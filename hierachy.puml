@@ -1,0 +1,54 @@
+@startuml
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+[视频源1\niv1=Source {type=Video} ] as iv1 #lightgreen
+[音频源1\nia1=Source {type=Audio} ] as ia1 #lightgreen
+[辅助数据1\nid1=Source {type=Data} ] as id1 #lightgreen
+[视频源2\niv1=Source {type=Video} ] as iv2 #pink
+[音频源2\nia1=Source {type=Audio} ] as ia2 #pink
+[音频源3\nia1=Source {type=Audio} ] as ia3 #pink
+[辅助数据2\nid1=Source {type=Data} ] as id2 #pink
+[视频输出\nov1=Destination {type=Video} ] as ov1 #lightgreen
+[音频输出\noa1=Destination {type=Audio} ] as oa1 #lightgreen
+[辅助输出\nod1=Destination {type=Data} ] as od1 #lightgreen
+[视频绑定1\nBinding] as bv1 #lightgreen
+[音频绑定1\nBinding] as ba1 #lightgreen
+[辅助数据绑定1\nBinding] as bd1 #lightgreen
+[视频绑定2\nBinding] as bv2 #pink
+[音频绑定2\nBinding] as ba2 #pink
+[音频绑定3\nBinding] as ba3 #pink
+[辅助数据绑定2\nBinding] as bd2 #pink
+[音频绑定3\nBinding] as ba3 #pink
+[绑定组1\nBindingGroup] as bg1 #lightgreen
+[绑定组2\nBindingGroup] as bg2 #pink
+[绑定组3\nBindingGroup] as bg3 #pink
+
+iv1 -down-> bv1
+iv2 -up-> bv2
+ov1 -up-> bv2
+ov1 -down-> bv1
+ia1 -down-> ba1
+ia2 -up-> ba2
+oa1 -up-> ba2
+oa1 -down-> ba1
+id1 -down-> bd1
+id2 -up-> bd2
+od1 -up-> bd2
+od1 -down-> bd1
+
+ia3 -up-> ba3
+oa1 -up-> ba3
+ba3 -up-> bg3
+bv2 -up-> bg3
+bd1 -up-> bg3
+
+bv2 -up- bg2
+ba2 -up- bg2
+bd2 -up- bg2
+bv1 -down- bg1
+ba1 -down- bg1
+bd1 -down- bg1
+
+@enduml

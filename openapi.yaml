@@ -1,0 +1,519 @@
+openapi: 3.1.0
+info:
+  title: 切换台控制面API说明
+  version: 0.1.0
+  description: |
+    切换台控制面API说明，本文档描述了切换台控制面的API接口，包括输入源、输出源、绑定组、绑定关系的操作。
+    绑定关系是输入源和输出源的绑定关系，绑定组是绑定关系的集合，绑定组生效后组内的绑定关系才会生效。
+    绑定组生效后，输出源所有其他的绑定关系均会失效，只有绑定组内的绑定关系生效。
+paths:
+  /time:
+    get:
+      description: 返回切换台本地的UNIX时间戳，单位为毫秒。这个API主要用于控制面的消费者确认服务端客户端时间差合理，防止时间相关的操作产生错误。
+      operationId: time_time_get
+      responses:
+        '200':
+          description: UNIX时间戳，单位毫秒。
+          content:
+            application/json:
+              schema:
+                type: integer
+  /healthz:
+    get:
+      description: 健康检查，确认切换台处于正常工作状态。正常工作指切换台所有组件就绪且能够接受外部请求。
+      operationId: healthz_healthz_get
+      responses:
+        '200':
+          description: 返回健康检查成功，非`OK`时，`status`为具体状态说明。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthzOkResponse'
+  /apis/v1/sources:
+    get:
+      description: 列出所有输入源。
+      operationId: list_sources_apis_v1_sources_get
+      responses:
+        '200':
+          description: 列出所有输入源。
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Source'
+                type: array
+    post:
+      description: 创建输入源。
+      operationId: create_source_apis_v1_sources_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: 输入源创建成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: 参数不合法，校验失败。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/sources/{source_uid}:
+    get:
+      description: 获取UID对应的输入源
+      operationId: get_source_apis_v1_sources__source_uid__get
+      parameters:
+        - name: source_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      description: |
+        删除UID对应的输入源，输入源属于某个绑定组无法被删除
+      operationId: delete_source_apis_v1_sources__source_uid__delete
+      parameters:
+        - name: source_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/destinations:
+    get:
+      description: 列出所有输出源。
+      operationId: list_destinations_apis_v1_destinations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Destination'
+                type: array
+    post:
+      description: 创建输出源。
+      operationId: create_destination_apis_v1_destinations_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DestinationCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Destination'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/destinations/{destination_uid}:
+    get:
+      description: 获取UID指定的输出源。
+      operationId: get_destination_apis_v1_destinations__destination_uid__get
+      parameters:
+        - name: destination_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Destination'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      description: 删除UID对应的输出源，如果输出源属于某个绑定则无法被删除。
+      operationId: delete_destination_apis_v1_destinations__destination_uid__delete
+      parameters:
+        - name: destination_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/groups:
+    get:
+      description: 列出所有绑定组。
+      operationId: list_groups_apis_v1_groups_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Group'
+                type: array
+    post:
+      description: 创建绑定组。
+      operationId: create_group_apis_v1_groups_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/groups/{group_uid}:
+    get:
+      description: 获取指定绑定组。
+      operationId: get_group_apis_v1_groups__group_uid__get
+      parameters:
+        - name: group_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      description: 删除指定绑定组。
+      operationId: delete_group_apis_v1_groups__group_uid__delete
+      parameters:
+        - name: group_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/bindings:
+    get:
+      description: 列出所有绑定关系。
+      operationId: list_bindings_apis_v1_bindings_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Binding'
+                type: array
+    post:
+      summary: Create Binding
+      description: Create a binding.
+      operationId: create_binding_apis_v1_bindings_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BindingCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Binding'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/bindings/{binding_uid}/enable:
+    post:
+      description: |
+        启用绑定组，启用后绑定组内的绑定关系才会生效。
+      parameters:
+        - name: binding_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    /apis/v1/bindings/{binding_uid}/disable:
+      post:
+        description: |
+          显式停用绑定组，停用后绑定组内的绑定关系将不会生效。
+        parameters:
+          - name: binding_uid
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Successful Response
+          '422':
+            description: Validation Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/HTTPValidationError'
+  /apis/v1/bindings/{binding_uid}:
+    get:
+      description: 获取UID对应的绑定关系。
+      operationId: get_binding_apis_v1_bindings__binding_uid__get
+      parameters:
+        - name: binding_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Binding'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      description: 删除UID对应的绑定关系，如果绑定关系在绑定组则无法进行绑定。
+      operationId: delete_binding_apis_v1_bindings__binding_uid__delete
+      parameters:
+        - name: binding_uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Binding:
+      properties:
+        source_uid:
+          type: string
+        destination_uid:
+          type: string
+        uid:
+          type: string
+      type: object
+      required:
+        - source_uid
+        - destination_uid
+        - uid
+    BindingCreateRequest:
+      properties:
+        source_uid:
+          type: string
+        destination_uid:
+          type: string
+      type: object
+      required:
+        - source_uid
+        - destination_uid
+    Destination:
+      properties:
+        display_name:
+          type: string
+        type:
+          allOf:
+            - $ref: '#/components/schemas/TypeEnum'
+          default: 0
+        address:
+          type: string
+        uid:
+          type: string
+      type: object
+    DestinationCreateRequest:
+      properties:
+        display_name:
+          type: string
+        type:
+          allOf:
+            - $ref: '#/components/schemas/TypeEnum'
+          default: 0
+        address:
+          type: string
+      type: object
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+      type: object
+    HealthzOkResponse:
+      properties:
+        status:
+          type: string
+          default: ok
+      type: object
+    Source:
+      properties:
+        display_name:
+          type: string
+        type:
+          allOf:
+            - $ref: '#/components/schemas/TypeEnum'
+          default: 0
+        address:
+          type: string
+        uid:
+          type: string
+      type: object
+    SourceCreateRequest:
+      properties:
+        display_name:
+          type: string
+        source_type:
+          allOf:
+            - $ref: '#/components/schemas/TypeEnum'
+          default: 0
+        address:
+          type: string
+      type: object
+    Group:
+      properties:
+        display_name:
+          type: string
+          default: ''
+        bindings:
+          items:
+            type: string
+          type: array
+          description: 绑定组UID列表
+        uid:
+          type: string
+      type: object
+    GroupCreateRequest:
+      properties:
+        display_name:
+          type: string
+          default: ''
+        bindings:
+          items:
+            type: string
+          type: array
+          description: 绑定组UID列表
+        enable:
+          desction: 是否生效对应绑定组
+          type: boolean
+          default: false
+      type: object
+    TypeEnum:
+      type: integer
+      description: |
+        流类型枚举值，
+        - 0为未设置，是无效的值，主要是防止某些编程语言的默认填充造成错误。
+        - 1为视频
+        - 2为音频
+        - 3为辅助数据
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+    ValidationError:
+      properties:
+        msg:
+          type: string
+      type: object
