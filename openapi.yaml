@@ -3,11 +3,11 @@ info:
   title: 切换台控制面API说明
   version: 0.1.0
   description: |
-    切换台控制面API说明，本文档描述了切换台控制面的API接口，包括输入源、输出源、绑定组、绑定关系的操作。
+    切换台控制面API说明，本文档描述了切换台控制面的API接口，包括输入源、输出目的、绑定组、绑定关系的操作。
 
-    绑定关系是输入源和输出源的绑定关系，绑定组是绑定关系的集合，绑定组生效后组内的绑定关系才会生效。
+    绑定关系是输入源和输出目的的绑定关系，绑定组是绑定关系的集合，绑定组生效后组内的绑定关系才会生效。
 
-    绑定组生效后，输出源所有其他的绑定关系均会失效，只有绑定组内的绑定关系生效。
+    绑定组生效后，输出目的所有其他的绑定关系均会失效，只有绑定组内的绑定关系生效。
 paths:
   /time:
     get:
@@ -113,7 +113,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /apis/v1/destinations:
     get:
-      description: 列出所有输出源。
+      description: 列出所有输出目的。
       operationId: list_destinations_apis_v1_destinations_get
       responses:
         '200':
@@ -125,7 +125,7 @@ paths:
                   $ref: '#/components/schemas/Destination'
                 type: array
     post:
-      description: 创建输出源。
+      description: 创建输出目的。
       operationId: create_destination_apis_v1_destinations_post
       requestBody:
         content:
@@ -148,7 +148,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /apis/v1/destinations/{destination_uid}:
     get:
-      description: 获取UID指定的输出源。
+      description: 获取UID指定的输出目的。
       operationId: get_destination_apis_v1_destinations__destination_uid__get
       parameters:
         - name: destination_uid
@@ -170,7 +170,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
-      description: 删除UID对应的输出源，如果输出源属于某个绑定则无法被删除。
+      description: 删除UID对应的输出目的，如果输出目的属于某个绑定则无法被删除。
       operationId: delete_destination_apis_v1_destinations__destination_uid__delete
       parameters:
         - name: destination_uid
@@ -305,12 +305,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /apis/v1/bindings/{binding_uid}/enable:
+  /apis/v1/groups/{group_id}/enable:
     post:
       description: |
         启用绑定组，启用后绑定组内的绑定关系才会生效。
       parameters:
-        - name: binding_uid
+        - name: group_id
           in: path
           required: true
           schema:
@@ -324,12 +324,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-    /apis/v1/bindings/{binding_uid}/disable:
+    /apis/v1/groups/{group_id}/disable:
       post:
         description: |
           显式停用绑定组，停用后绑定组内的绑定关系将不会生效。
         parameters:
-          - name: binding_uid
+          - name: group_id
             in: path
             required: true
             schema:
